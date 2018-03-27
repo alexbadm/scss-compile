@@ -18,6 +18,7 @@ log(chalk.yellow('Watching dir: ' + rootPath));
 
 const files = getAllFiles(rootPath);
 const scssFiles = files.filter(name => /^[^_.].*\.scss$/.test(path.basename(name))).map(name => path.resolve(name));
+processScss(scssFiles);
 
 const watcher = chokidar.watch(path.join(rootPath, '**/*.scss'), {
   ignored: ignoredRegexp,
@@ -26,8 +27,11 @@ const watcher = chokidar.watch(path.join(rootPath, '**/*.scss'), {
 
 watcher.on('change', filePath => {
   log(`File ${filePath} has been changed`);
+  processScss(scssFiles);
+});
 
-  scssFiles.forEach(fileName => {
+function processScss (files) {
+  files.forEach(fileName => {
     const cssPath = fileName.replace(/scss$/, 'css');
     sass.render({
       file: fileName,
@@ -56,7 +60,7 @@ watcher.on('change', filePath => {
       });
     });
   });
-});
+}
 
 /**
  * Find all files inside a dir, recursively.

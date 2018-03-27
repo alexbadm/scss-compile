@@ -9,17 +9,18 @@ const path = require('path');
 const postcss  = require('postcss');
 const sass = require('node-sass');
 
-var prefixer = postcss([ autoprefixer ]);
-var log = console.log.bind(console);
+const prefixer = postcss([ autoprefixer ]);
+const log = console.log.bind(console);
+const ignoredRegexp = /(^|[\/\\])\../;
 
 const rootPath = path.resolve(globParent(process.argv[2]));
-console.log(chalk.yellow(rootPath));
+log(chalk.yellow('Watching dir: ' + rootPath));
 
 const files = getAllFiles(rootPath);
 const scssFiles = files.filter(name => /^[^_.].*\.scss$/.test(path.basename(name))).map(name => path.resolve(name));
 
 const watcher = chokidar.watch(path.join(rootPath, '**/*.scss'), {
-  ignored: /(^|[\/\\])\../,
+  ignored: ignoredRegexp,
   persistent: true
 });
 
@@ -47,10 +48,10 @@ watcher.on('change', filePath => {
   
       css.then(result => {
         result.warnings().forEach(function (warn) {
-          console.warn(warn.toString());
+          log(chalk.magenta(warn.toString()));
         });
         fs.writeFile(cssPath, result.css);
-        console.log(chalk.green('Write file ' + cssPath));
+        log(chalk.green('Write file ' + cssPath));
         if ( result.map ) fs.writeFile(cssPath + '.map', result.map);
       });
     });
@@ -65,6 +66,9 @@ watcher.on('change', filePath => {
  */
 function getAllFiles (dir) {
   return fs.readdirSync(dir).reduce((files, file) => {
+    if (file === 'node_modules' || ignoredRegexp.test(file)) {
+      return files;
+    }
     const name = path.join(dir, file);
     const isDirectory = fs.statSync(name).isDirectory();
     return isDirectory ? [...files, ...getAllFiles(name)] : [...files, name];

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "ES6",
+    "module": "commonjs",
+    "removeComments": true,
+
+    /* Strict Type-Checking Options */
+    "strict": true,
+    "esModuleInterop": true
+  }
+}

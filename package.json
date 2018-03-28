@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,12 @@
     "glob-parent": "^3.1.0",
     "node-sass": "^4.8.3",
     "postcss": "^6.0.21"
+  },
+  "devDependencies": {
+    "@types/autoprefixer": "^6.7.3",
+    "@types/chokidar": "^1.7.5",
+    "@types/glob-parent": "^3.1.0",
+    "@types/node": "^9.6.0",
+    "@types/node-sass": "^3.10.32"
   }
 }

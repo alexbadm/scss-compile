@@ -13,6 +13,7 @@ npm i -D git+https://github.com/alexbadm/scss-compile.git
 ## Usage
 
 package.json
+
 ```json
 "scripts": {
   "compile": "scss-compile"
@@ -29,7 +30,7 @@ To configure target browsers put your .browserslistrc config file near your scss
 
 For example:
 
-```
+```txt
 # .browserslistrc
 > 1%
 Last 2 versions

@@ -12,24 +12,27 @@ const globParent = require("glob-parent");
 const sass = require("node-sass");
 const path = require("path");
 const postcss = require("postcss");
+require("rxjs/add/operator/debounceTime");
+const Subject_1 = require("rxjs/Subject");
 const prefixer = postcss([autoprefixer]);
 const log = console.log.bind(console);
-const ignoredRegexp = /(^|[\/\\])\../;
+const ignored = /(^|[\/\\])\../;
 const rootPath = path.resolve(globParent(process.argv[2]));
 log(chalk_1.default.yellow('Watching dir: ' + rootPath));
-const files = getAllFiles(rootPath);
-const scssFiles = files.filter((name) => /^[^_.].*\.scss$/.test(path.basename(name))).map((name) => path.resolve(name));
-processScss(scssFiles);
+const scssFiles = getAllFiles(rootPath)
+    .filter(name => /^[^_.].*\.s[ac]ss$/.test(path.basename(name)))
+    .map(name => path.resolve(name));
+const watcher = chokidar.watch(path.join(rootPath, '**/*.scss'), { ignored, persistent: true });
+const processFiles = processScss.bind(null, scssFiles);
+const eventStream = new Subject_1.Subject();
+eventStream.debounceTime(200).subscribe(processFiles);
+processFiles();
 const writeFileError = (filename) => (err) => {
     err ? log(chalk_1.default.red('Failed to write file: ' + err)) : log(chalk_1.default.green('Write file ' + filename));
 };
-const watcher = chokidar.watch(path.join(rootPath, '**/*.scss'), {
-    ignored: ignoredRegexp,
-    persistent: true,
-});
 watcher.on('change', (filePath) => {
     log(`File ${filePath} has been changed`);
-    processScss(scssFiles);
+    eventStream.next(filePath);
 });
 function processScss(fileNames) {
     fileNames.forEach((fileName) => {
@@ -61,7 +64,7 @@ function processScss(fileNames) {
 }
 function getAllFiles(dir) {
     return fs.readdirSync(dir).reduce((allFiles, file) => {
-        if (file === 'node_modules' || ignoredRegexp.test(file)) {
+        if (file === 'node_modules' || ignored.test(file)) {
             return allFiles;
         }
         const name = path.join(dir, file);
